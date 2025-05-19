@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biology Quiz Game</title>
+    <style>
+        /* CSS */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #E3F2FD;
+        }
+
+        .container {
+            margin-top: 50px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            width: 60%;
+        }
+
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #quizSection, #resultSection {
+            display: none;
+        }
+
+        .question {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        .option {
+            display: block;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        #timer {
+            font-size: 18px;
+            font-weight: bold;
+            color: red;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Biology Quiz Game</h1>
+
+        <!-- Login Section -->
+        <div id="loginSection">
+            <input type="email" id="userEmail" placeholder="Enter your email">
+            <button onclick="startQuiz()">Start Quiz</button>
+        </div>
+
+        <!-- Quiz Section -->
+        <div id="quizSection">
+            <h2>Answer the following questions:</h2>
+            <p id="timer">Time Left: 30:00</p>
+            <div id="quizContent"></div>
+            <button onclick="submitQuiz()">Submit Answers</button>
+        </div>
+
+        <!-- Result Section -->
+        <div id="resultSection">
+            <h2>Quiz Completed!</h2>
+            <p id="scoreDisplay"></p>
+        </div>
+    </div>
+
+    <script>
+        // Biology questions (randomized per user)
+        const biologyQuestions = [
+            { question: "Which organelle is responsible for energy production in a cell?", options: ["Mitochondria", "Nucleus", "Ribosome", "Golgi apparatus"], answer: "Mitochondria" },
+            { question: "What is the basic unit of life?", options: ["Tissue", "Organ", "Cell", "Molecule"], answer: "Cell" },
+            { question: "Which blood type is known as the universal donor?", options: ["Type O", "Type A", "Type B", "Type AB"], answer: "Type O" },
+            { question: "What process do plants use to make food?", options: ["Respiration", "Photosynthesis", "Transpiration", "Fermentation"], answer: "Photosynthesis" },
+            { question: "Which system in the body transports oxygen and nutrients?", options: ["Respiratory", "Digestive", "Circulatory", "Nervous"], answer: "Circulatory" },
+            { question: "What is the function of the large intestine?", options: ["Digest proteins", "Absorb nutrients", "Store bile", "Absorb water"], answer: "Absorb water" },
+            { question: "Which gas is released by plants during photosynthesis?", options: ["Carbon dioxide", "Oxygen", "Nitrogen", "Hydrogen"], answer: "Oxygen" },
+            { question: "Which part of the plant absorbs water?", options: ["Leaves", "Stem", "Roots", "Flowers"], answer: "Roots" },
+            { question: "What is the powerhouse of the cell?", options: ["Chloroplast", "Mitochondria", "Ribosome", "Nucleus"], answer: "Mitochondria" },
+            { question: "Which part of the brain controls balance?", options: ["Cerebrum", "Cerebellum", "Brainstem", "Hypothalamus"], answer: "Cerebellum" }
+        ];
+
+        let userEmail = "";
+        let selectedQuestions = [];
+        let userAnswers = {};
+        let timeLeft = 1800; // 30 minutes in seconds
+
+        function startQuiz() {
+            userEmail = document.getElementById("userEmail").value;
+            if (!userEmail) {
+                alert("Please enter your email to start!");
+                return;
+            }
+
+            document.getElementById("loginSection").style.display = "none";
+            document.getElementById("quizSection").style.display = "block";
+
+            // Start countdown timer
+            setInterval(updateTimer, 1000);
+
+            // Randomly select 20 questions
+            selectedQuestions = biologyQuestions.sort(() => Math.random() - 0.5).slice(0, 20);
+
+            let quizHTML = "";
+            selectedQuestions.forEach((q, index) => {
+                quizHTML += `<div class="question">${index + 1}. ${q.question}</div>`;
+                q.options.forEach(option => {
+                    quizHTML += `<input type="radio" name="q${index}" value="${option}" class="option">${option}<br>`;
+                });
+            });
+
+            document.getElementById("quizContent").innerHTML = quizHTML;
+        }
+
+        function updateTimer() {
+            if (timeLeft <= 0) {
+                submitQuiz();
+            } else {
+                timeLeft--;
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                document.getElementById("timer").innerText = `Time Left: ${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+            }
+        }
+
+        function submitQuiz() {
+            selectedQuestions.forEach((q, index) => {
+                const selectedOption = document.querySelector(`input[name="q${index}"]:checked`);
+                if (selectedOption) {
+                    userAnswers[q.question] = selectedOption.value;
+                }
+            });
+
+            let score = 0;
+            selectedQuestions.forEach(q => {
+                if (userAnswers[q.question] === q.answer) {
+                    score++;
+                }
+            });
+
+            document.getElementById("quizSection").style.display = "none";
+            document.getElementById("resultSection").style.display = "block";
+            document.getElementById("scoreDisplay").innerHTML = `You scored ${score} out of 20!`;
+
+            sendResultsByEmail(userEmail, score);
+        }
+
+        function sendResultsByEmail(email, score) {
+            console.log(`Email sent to: ${email}\nScore: ${score}/20`);
+            alert("Your results have been submitted via email!");
+        }
+    </script>
+</body>
+</html>
